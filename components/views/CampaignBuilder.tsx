@@ -59,28 +59,47 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
   };
 
   // Upload File
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    const processData = (data: any[]) => {
+      const parsedLeads = data
+        .filter((r: any) => r.email)
+        .map((r: any) => {
+          let role_type = r.role_type?.trim().toLowerCase();
+          if (!role_type && r.position) {
+            const pos = r.position.toLowerCase();
+            if (pos.includes('react native') || pos.includes('react_native')) role_type = 'react_native';
+            else if (pos.includes('front') || pos.includes('ui') || pos.includes('web')) role_type = 'frontend';
+            else if (pos.includes('fullstack') || pos.includes('full stack') || pos.includes('full-stack')) role_type = 'fullstack';
+            else role_type = 'software';
+          }
+          return { ...r, role_type: role_type || 'software' };
+        });
+      setLeads(parsedLeads);
+    };
+
+    if (file.name.endsWith('.csv')) {
       Papa.parse(file, {
         header: true,
-        complete: (results) => {
-          const parsedLeads = results.data
-            .filter((r: any) => r.email)
-            .map((r: any) => {
-              let role_type = r.role_type?.trim().toLowerCase();
-              if (!role_type && r.position) {
-                const pos = r.position.toLowerCase();
-                if (pos.includes('react native') || pos.includes('react_native')) role_type = 'react_native';
-                else if (pos.includes('front') || pos.includes('ui') || pos.includes('web')) role_type = 'frontend';
-                else if (pos.includes('fullstack') || pos.includes('full stack') || pos.includes('full-stack')) role_type = 'fullstack';
-                else role_type = 'software';
-              }
-              return { ...r, role_type: role_type || 'software' };
-            });
-          setLeads(parsedLeads);
-        }
+        complete: (results) => processData(results.data)
       });
+    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      try {
+        const xlsx = await import('xlsx');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = xlsx.read(data, { type: 'array' });
+          const firstSheet = workbook.SheetNames[0];
+          const excelData = xlsx.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+          processData(excelData);
+        };
+        reader.readAsArrayBuffer(file);
+      } catch (err) {
+        alert("Please install the 'xlsx' package to parse Excel files: npm install xlsx");
+      }
     }
   };
 
@@ -254,7 +273,7 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
                       <p className="mb-2 text-sm text-gray-700 font-medium"><span className="font-semibold text-blue-600">Click to upload</span> or drag and drop</p>
                       <p className="text-xs text-gray-500">CSV or Excel format (MAX. 10,000 rows)</p>
                     </div>
-                    <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
+                    <input type="file" accept=".csv, .xlsx, .xls" className="hidden" onChange={handleFileUpload} />
                   </label>
                 </div>
 
