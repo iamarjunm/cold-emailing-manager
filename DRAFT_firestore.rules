@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function existing() {
+      return resource.data;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Accounts
+    match /accounts/{accountId} {
+      allow read, list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() 
+        && isValidId(accountId)
+        && incoming().userId == request.auth.uid
+        && incoming().createdAt == request.time;
+      allow update: if isSignedIn() 
+        && isValidId(accountId)
+        && existing().userId == request.auth.uid 
+        && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() 
+        && isValidId(accountId)
+        && existing().userId == request.auth.uid;
+    }
+
+    // Campaigns
+    match /campaigns/{campaignId} {
+      allow read, list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() 
+        && isValidId(campaignId)
+        && incoming().userId == request.auth.uid
+        && incoming().createdAt == request.time;
+      allow update: if isSignedIn() 
+        && isValidId(campaignId)
+        && existing().userId == request.auth.uid 
+        && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() 
+        && isValidId(campaignId)
+        && existing().userId == request.auth.uid;
+    }
+
+    // Leads
+    match /leads/{leadId} {
+      allow read, list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() 
+        && isValidId(leadId)
+        && incoming().userId == request.auth.uid
+        && incoming().createdAt == request.time;
+      allow update: if isSignedIn() 
+        && isValidId(leadId)
+        && existing().userId == request.auth.uid 
+        && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() 
+        && isValidId(leadId)
+        && existing().userId == request.auth.uid;
+    }
+
+    // Templates
+    match /templates/{templateId} {
+      allow read, list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() 
+        && isValidId(templateId)
+        && incoming().userId == request.auth.uid
+        && incoming().createdAt == request.time;
+      allow update: if isSignedIn() 
+        && isValidId(templateId)
+        && existing().userId == request.auth.uid 
+        && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() 
+        && isValidId(templateId)
+        && existing().userId == request.auth.uid;
+    }
+
+    // Analytics
+    match /analytics/{analyticsId} {
+      allow read, list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() 
+        && isValidId(analyticsId)
+        && incoming().userId == request.auth.uid
+        && incoming().createdAt == request.time;
+      allow update: if isSignedIn() 
+        && isValidId(analyticsId)
+        && existing().userId == request.auth.uid 
+        && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() 
+        && isValidId(analyticsId)
+        && existing().userId == request.auth.uid;
+    }
+  }
+}
