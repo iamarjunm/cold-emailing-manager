@@ -42,10 +42,24 @@ export function HelpSupportView() {
                 <code className="text-sm font-medium text-gray-700">position</code>
                 <span className="text-xs font-medium bg-gray-200 text-gray-600 px-2 py-0.5 rounded">Optional</span>
               </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-100">
+                <div className="flex flex-col">
+                  <code className="text-sm font-medium text-gray-700">role_type</code>
+                  <span className="text-xs text-gray-500 mt-1">Must be one of: react_native, frontend, fullstack, software</span>
+                </div>
+                <span className="text-xs font-medium bg-gray-200 text-gray-600 px-2 py-0.5 rounded">Optional</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-100">
+                <div className="flex flex-col">
+                  <code className="text-sm font-medium text-gray-700">company_hook</code>
+                  <span className="text-xs text-gray-500 mt-1">A personalized opening line about the company</span>
+                </div>
+                <span className="text-xs font-medium bg-gray-200 text-gray-600 px-2 py-0.5 rounded">Optional</span>
+              </div>
             </div>
 
             <a 
-              href={`data:text/csv;charset=utf-8,${encodeURIComponent('email,name,company,position\njohn@example.com,John Doe,Acme Corp,CEO')}`} 
+              href={`data:text/csv;charset=utf-8,${encodeURIComponent('email,name,company,position,role_type,company_hook\njohn@example.com,John Doe,Acme Corp,CEO,software,"Loved your recent product launch"')}`} 
               download="outreach_template.csv" 
               className="text-sm text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1"
             >

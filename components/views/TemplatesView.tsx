@@ -161,9 +161,13 @@ export function TemplatesView() {
               <div className="space-y-4 text-sm text-gray-600">
                 <div>
                   <p className="font-medium text-gray-800 mb-1">Standard Variables</p>
-                  <code className="text-xs bg-gray-100 text-pink-600 px-1 py-0.5 rounded">{"{{name}}"}</code>
-                  <code className="text-xs bg-gray-100 text-pink-600 px-1 py-0.5 rounded ml-2">{"{{company}}"}</code>
-                  <code className="text-xs bg-gray-100 text-pink-600 px-1 py-0.5 rounded ml-2">{"{{position}}"}</code>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <code className="text-xs bg-gray-100 text-pink-600 px-1 py-0.5 rounded">{"{{name}}"}</code>
+                    <code className="text-xs bg-gray-100 text-pink-600 px-1 py-0.5 rounded">{"{{company}}"}</code>
+                    <code className="text-xs bg-gray-100 text-pink-600 px-1 py-0.5 rounded">{"{{position}}"}</code>
+                    <code className="text-xs bg-gray-100 text-pink-600 px-1 py-0.5 rounded">{"{{role_type}}"}</code>
+                    <code className="text-xs bg-gray-100 text-pink-600 px-1 py-0.5 rounded">{"{{company_hook}}"}</code>
+                  </div>
                 </div>
 
                 <div>

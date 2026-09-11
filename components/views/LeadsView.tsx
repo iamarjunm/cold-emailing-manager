@@ -95,7 +95,14 @@ export function LeadsView() {
                   <td className="py-4 px-6">
                     <div className="flex flex-col">
                       <span className="font-medium text-gray-900 text-sm">{lead.company || '-'}</span>
-                      <span className="text-xs text-gray-500">{lead.position || '-'}</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-gray-500">{lead.position || '-'}</span>
+                        {lead.role_type && (
+                          <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium tracking-wide uppercase">
+                            {lead.role_type.replace('_', ' ')}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="py-4 px-6">

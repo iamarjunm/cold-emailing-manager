@@ -65,11 +65,25 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
       Papa.parse(file, {
         header: true,
         complete: (results) => {
-          setLeads(results.data.filter((r: any) => r.email));
+          const parsedLeads = results.data
+            .filter((r: any) => r.email)
+            .map((r: any) => {
+              let role_type = r.role_type?.trim().toLowerCase();
+              if (!role_type && r.position) {
+                const pos = r.position.toLowerCase();
+                if (pos.includes('react native') || pos.includes('react_native')) role_type = 'react_native';
+                else if (pos.includes('front') || pos.includes('ui') || pos.includes('web')) role_type = 'frontend';
+                else if (pos.includes('fullstack') || pos.includes('full stack') || pos.includes('full-stack')) role_type = 'fullstack';
+                else role_type = 'software';
+              }
+              return { ...r, role_type: role_type || 'software' };
+            });
+          setLeads(parsedLeads);
         }
       });
     }
   };
+
 
   return (
     <div className="h-full flex flex-col bg-[#FAFAFA]">
@@ -220,7 +234,7 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
               <div className="space-y-8 animate-in fade-in">
                 <div>
                   <h3 className="text-lg font-display font-semibold mb-1">Upload Leads</h3>
-                  <p className="text-sm text-gray-500 mb-6">Upload a CSV containing your leads. Need a specific format? <a href={`data:text/csv;charset=utf-8,${encodeURIComponent('email,name,company,position\njohn@example.com,John Doe,Acme Corp,CEO')}`} download="outreach_template.csv" className="text-blue-600 hover:underline">Download our template here</a>.</p>
+                  <p className="text-sm text-gray-500 mb-6">Upload a CSV containing your leads. Need a specific format? <a href={`data:text/csv;charset=utf-8,${encodeURIComponent('email,name,company,position,role_type,company_hook\njohn@example.com,John Doe,Acme Corp,CEO,software,"Loved your recent product launch"')}`} download="outreach_template.csv" className="text-blue-600 hover:underline">Download our template here</a>.</p>
                   
                   <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <h4 className="text-sm font-semibold text-gray-700 mb-2">Required Columns Format</h4>
@@ -229,6 +243,8 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
                       <span className="px-2 py-1 bg-white border border-gray-300 text-gray-600 font-mono rounded">name (optional)</span>
                       <span className="px-2 py-1 bg-white border border-gray-300 text-gray-600 font-mono rounded">company (optional)</span>
                       <span className="px-2 py-1 bg-white border border-gray-300 text-gray-600 font-mono rounded">position (optional)</span>
+                      <span className="px-2 py-1 bg-white border border-gray-300 text-gray-600 font-mono rounded">role_type (optional)</span>
+                      <span className="px-2 py-1 bg-white border border-gray-300 text-gray-600 font-mono rounded">company_hook (optional)</span>
                     </div>
                   </div>
 
@@ -327,10 +343,12 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
                       />
                       
                       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                        <div className="flex gap-2 text-xs text-gray-500">
+                        <div className="flex flex-wrap gap-2 text-xs text-gray-500">
                           <span className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200">{"{{name}}"}</span>
                           <span className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200">{"{{company}}"}</span>
                           <span className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200">{"{{position}}"}</span>
+                          <span className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200">{"{{role_type}}"}</span>
+                          <span className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200">{"{{company_hook}}"}</span>
                         </div>
                         <label className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-2">
                           <File className="w-4 h-4" />
