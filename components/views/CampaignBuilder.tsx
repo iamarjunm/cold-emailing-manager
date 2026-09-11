@@ -20,7 +20,7 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
   const [leads, setLeads] = useState<any[]>([]);
   
   // Sequence
-  const [sequence, setSequence] = useState([{ id: 1, type: 'initial', delay: 0, body: '' }]);
+  const [sequence, setSequence] = useState<any[]>([{ id: 1, type: 'initial', delay: 0, body: '', attachment: null }]);
   const [isLaunching, setIsLaunching] = useState(false);
   
   // Delivery Settings
@@ -103,6 +103,14 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
     }
   };
 
+  const handleAttachment = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const newSeq = [...sequence];
+      newSeq[index] = { ...newSeq[index], attachment: file };
+      setSequence(newSeq);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col bg-[#FAFAFA]">
@@ -371,8 +379,8 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
                         </div>
                         <label className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-2">
                           <File className="w-4 h-4" />
-                          Attach Resume
-                          <input type="file" className="hidden" />
+                          {seq.attachment ? seq.attachment.name : 'Attach Resume'}
+                          <input type="file" className="hidden" onChange={(e) => handleAttachment(index, e)} />
                         </label>
                       </div>
                     </div>
@@ -426,7 +434,11 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
                   </div>
                   <div className="flex justify-between py-3">
                     <span className="text-gray-500 font-medium">Attachments</span>
-                    <span className="font-semibold text-gray-900">None</span>
+                    <span className="font-semibold text-gray-900">
+                      {sequence.filter(s => s.attachment).length > 0 
+                        ? `${sequence.filter(s => s.attachment).length} file(s) attached` 
+                        : 'None'}
+                    </span>
                   </div>
                 </div>
 
