@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, Upload, CheckCircle2, ChevronRight, File, X, Mail, Plus, Play, Loader2 } from 'lucide-react';
 import Papa from 'papaparse';
 import { createCampaign, createMultipleLeads } from '@/lib/db';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 
 type BuilderStep = 'setup' | 'audience' | 'sequence' | 'review';
 
@@ -30,12 +32,31 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
   const handleLaunch = async () => {
     setIsLaunching(true);
     try {
+      // 0. Upload attachments to Storage
+      const processedSequence = await Promise.all(sequence.map(async (seq) => {
+        if (seq.attachment instanceof File) {
+          const fileRef = ref(storage, `campaign_attachments/${Date.now()}_${seq.attachment.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`);
+          await uploadBytes(fileRef, seq.attachment);
+          const url = await getDownloadURL(fileRef);
+          return {
+            ...seq,
+            attachment: {
+              name: seq.attachment.name,
+              url,
+              type: seq.attachment.type,
+              size: seq.attachment.size
+            }
+          };
+        }
+        return seq;
+      }));
+
       // 1. Save campaign
       const campaignId = await createCampaign({
         name: campaignName || 'Untitled Campaign',
         subjectA,
         subjectB: abTestEnabled ? subjectB : null,
-        sequence,
+        sequence: processedSequence,
         leadCount: leads.length,
         deliverySettings: {
           sendDelayMinutes,
