@@ -34,9 +34,11 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
     try {
       // 0. Upload attachments to Storage
       const processedSequence = await Promise.all(sequence.map(async (seq) => {
-        if (seq.attachment instanceof File) {
-          const fileRef = ref(storage, `campaign_attachments/${Date.now()}_${seq.attachment.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`);
-          await uploadBytes(fileRef, seq.attachment);
+        // More robust check for File object that doesn't rely on instanceof which can fail across browser contexts
+        if (seq.attachment && typeof seq.attachment === 'object' && 'name' in seq.attachment && 'size' in seq.attachment && typeof (seq.attachment as any).arrayBuffer === 'function') {
+          const file = seq.attachment as File;
+          const fileRef = ref(storage, `campaign_attachments/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`);
+          await uploadBytes(fileRef, file);
           const url = await getDownloadURL(fileRef);
           return {
             ...seq,
