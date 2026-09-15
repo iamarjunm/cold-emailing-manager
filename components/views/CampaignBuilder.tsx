@@ -32,21 +32,27 @@ export function CampaignBuilder({ onCancel }: { onCancel: () => void }) {
   const handleLaunch = async () => {
     setIsLaunching(true);
     try {
-      // 0. Upload attachments to Storage
+      // 0. Convert attachments to Base64 to bypass Firebase Storage CORS issues
       const processedSequence = await Promise.all(sequence.map(async (seq) => {
-        // More robust check for File object that doesn't rely on instanceof which can fail across browser contexts
+        // Robust check for File object
         if (seq.attachment && typeof seq.attachment === 'object' && 'name' in seq.attachment && 'size' in seq.attachment && typeof (seq.attachment as any).arrayBuffer === 'function') {
           const file = seq.attachment as File;
-          const fileRef = ref(storage, `campaign_attachments/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`);
-          await uploadBytes(fileRef, file);
-          const url = await getDownloadURL(fileRef);
+          
+          // Convert file to Base64 using FileReader (Browser native)
+          const base64Url = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+          
           return {
             ...seq,
             attachment: {
-              name: seq.attachment.name,
-              url,
-              type: seq.attachment.type,
-              size: seq.attachment.size
+              name: file.name,
+              url: base64Url,
+              type: file.type,
+              size: file.size
             }
           };
         }
